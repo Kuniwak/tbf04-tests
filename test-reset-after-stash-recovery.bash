@@ -12,12 +12,11 @@ WORKSPACE=$(mktemp -d ./reset-after-stash-recovery.XXXXXX)
 
   git add b
   git stash
-  git stash pop
-  rm b
+  git stash clear
 
   git reset --hard HEAD
 
-  git fsck --dangling
+  git fsck
 )
 
 rmtrash $WORKSPACE

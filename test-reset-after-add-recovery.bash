@@ -13,7 +13,10 @@ WORKSPACE=$(mktemp -d ./reset-after-add-recovery.XXXXXX)
   git add b
   git reset --hard HEAD
 
-  git fsck --dangling
+  git fsck
+  DANGLING_BLOB=$(git fsck | grep 'dangling blob' | sed -e 's/^dangling blob \([0-9a-f]*\)/\1/')
+
+  git show $DANGLING_BLOB
 )
 
 rmtrash $WORKSPACE
