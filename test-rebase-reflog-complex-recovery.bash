@@ -33,9 +33,9 @@ WORKSPACE=$(mktemp -d ./rebase-reflog-complex-recovery.XXXXXX)
 
   git rebase master
   git log --oneline
-  git reflog
+  git reflog branch-c
 
-  git show HEAD@{4}
+  git show branch-c@{1}
 )
 
 rmtrash $WORKSPACE
