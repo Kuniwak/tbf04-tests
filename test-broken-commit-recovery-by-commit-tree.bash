@@ -9,40 +9,37 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
 
   (cd remote
     git init
-
     echo a > a
+    echo b > b
     echo c > c
-    echo d > d
 
+    export GIT_AUTHOR_DATE='1521450633 +0900'
+    export GIT_COMMITTER_DATE='1521450633 +0900'
     git add a
     git commit -m "Add a"
 
-    git checkout -b branch-b
+    export GIT_AUTHOR_DATE='1521450693 +0900'
+    export GIT_COMMITTER_DATE='1521450693 +0900'
+    git add b
+    git commit -m "Add b"
 
+    export GIT_AUTHOR_DATE='1521450753 +0900'
+    export GIT_COMMITTER_DATE='1521450753 +0900'
     git add c
     git commit -m "Add c"
-
-    git add d
-    git commit -m "Add d"
-
-    git checkout master
   )
 
   git clone ./remote ./broken --no-local
   (cd broken
     PACKFILE=$(find .git/objects/pack -name 'pack-*.pack')
-    echo b > b
-    mkdir e
-    echo e > e/e
+    echo d > d
 
-    git add b
-    git commit -m "Add b"
-
-    git add e/e
-    git commit -m "Add e"
+    export GIT_AUTHOR_DATE='1521450753 +0900'
+    export GIT_COMMITTER_DATE='1521450753 +0900'
+    git add d
+    git commit -m "Add d"
 
     COMMIT=$(git rev-parse HEAD^^)
-    COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
 
     git cat-file -p $COMMIT
 
@@ -52,20 +49,34 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
     git unpack-objects < ./pack
     rmtrash ./pack
 
-    chmod +w $COMMIT_FILE
-    echo > $COMMIT_FILE
-    chmod -x $COMMIT_FILE
+    COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm  $COMMIT_FILE
 
-		set +e
-    git fsck
-		echo $?
-		set -e
+    git fsck || true
+
+    BROKEN_CHILD=$(git fsck | grep 'broken' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
+    BROKEN_PARENT=$(git fsck | grep 'dangling commit' | sed -e 's/dangling commit \(.*\)/\1/' || true)
+    BROKEN_TREE=$(git fsck | grep 'dangling tree' | sed -e 's/dangling tree \(.*\)/\1/' || true)
+
+    git cat-file -p $BROKEN_PARENT
+    git cat-file -p $BROKEN_CHILD
+
+    BROKEN_PARENT_TREE=$(git log -1 --format=%T $BROKEN_PARENT)
+    git diff $BROKEN_PARENT_TREE $BROKEN_TREE
+
+    export GIT_AUTHOR_NAME='Kuniwak'
+    export GIT_AUTHOR_EMAIL='orga.chem.job@gmail.com'
+    export GIT_COMMITTER_NAME='Kuniwak'
+    export GIT_COMMITTER_EMAIL='orga.chem.job@gmail.com'
+    for time in {1521450633..1521450753}; do
+      export GIT_AUTHOR_DATE="$time +0900"
+      export GIT_COMMITTER_DATE="$time +0900"
+
+      git commit-tree $BROKEN_TREE -p $BROKEN_PARENT -m 'Add b'
+    done
   )
 
-  (cd ./broken
-    git gc
-    git fsck
-  )
+  git fsck
 )
 
 rmtrash $WORKSPACE

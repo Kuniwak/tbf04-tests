@@ -6,8 +6,6 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
 
 (cd $WORKSPACE
   mkdir remote
-  export GIT_AUTHOR_DATE='1521450633 +0900'
-  export GIT_COMMITTER_DATE='1521450633 +0900'
 
   (cd remote
     git init
@@ -15,12 +13,18 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
     echo b > b
     echo c > c
 
+    export GIT_AUTHOR_DATE='1521450633 +0900'
+    export GIT_COMMITTER_DATE='1521450633 +0900'
     git add a
     git commit -m "Add a"
 
+    export GIT_AUTHOR_DATE='1521450693 +0900'
+    export GIT_COMMITTER_DATE='1521450693 +0900'
     git add b
     git commit -m "Add b"
 
+    export GIT_AUTHOR_DATE='1521450753 +0900'
+    export GIT_COMMITTER_DATE='1521450753 +0900'
     git add c
     git commit -m "Add c"
   )
@@ -30,6 +34,8 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
     PACKFILE=$(find .git/objects/pack -name 'pack-*.pack')
     echo d > d
 
+    export GIT_AUTHOR_DATE='1521450753 +0900'
+    export GIT_COMMITTER_DATE='1521450753 +0900'
     git add d
     git commit -m "Add d"
 
@@ -46,6 +52,7 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
     COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
     rm  $COMMIT_FILE
 
+    git log || true
     git fsck || true
   )
 
