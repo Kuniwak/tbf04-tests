@@ -39,10 +39,6 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
     git add d
     git commit -m "Add d"
 
-    COMMIT=$(git rev-parse HEAD^^)
-
-    git cat-file -p $COMMIT
-
     git fsck
 
     mv $PACKFILE ./pack
