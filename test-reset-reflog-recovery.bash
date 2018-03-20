@@ -26,7 +26,7 @@ WORKSPACE=$(mktemp -d ./reset-after-reflog-recovery.XXXXXX)
   git checkout master
   git merge work-1
 
-  git reflog
+  git reflog master
 )
 
 rmtrash $WORKSPACE
