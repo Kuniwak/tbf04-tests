@@ -54,15 +54,27 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
     rm  $TREE_FILE
 
     git fsck || true
-  )
 
-  git clone ./remote ./re-cloned --no-local
-  ALTER_PACKFILE=$(find re-cloned/.git/objects/pack -name 'pack-*.pack')
-  PACKFILE_BASENAME=$(basename $ALTER_PACKFILE)
-  mv $ALTER_PACKFILE ./broken/.git/objects/pack/$PACKFILE_BASENAME
+    COMMIT=$(git fsck | grep 'broken link' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
+    PARENTS=$(git rev-parse $COMMIT^@)
+    CHILDREN=$(for CANDIDATE in $(git rev-list --all); do git rev-parse $CANDIDATE^@ | grep -q $COMMIT && echo $CANDIDATE || true; done)
 
-  (cd ./broken
-    git fsck && echo OK || echo NG
+    for PARENT in $PARENTS; do
+      for CHILD in $CHILDREN; do
+        git diff $PARENT..$CHILD
+
+        git checkout $CHILDREN
+        git reset HEAD
+        git rm b
+        git write-tree
+
+        git reset HEAD
+        git rm c
+        git write-tree
+      done
+    done
+
+    git fsck
   )
 )
 

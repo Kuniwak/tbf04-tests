@@ -54,15 +54,43 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
     rm  $TREE_FILE
 
     git fsck || true
-  )
 
-  git clone ./remote ./re-cloned --no-local
-  ALTER_PACKFILE=$(find re-cloned/.git/objects/pack -name 'pack-*.pack')
-  PACKFILE_BASENAME=$(basename $ALTER_PACKFILE)
-  mv $ALTER_PACKFILE ./broken/.git/objects/pack/$PACKFILE_BASENAME
+    COMMIT=$(git fsck | grep 'broken link' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
+    BROKEN_TREE=$(git fsck | grep 'missing tree' | sed -e 's/missing tree \(.*\)/\1/' || true)
+    PARENT_TREE=$(git rev-parse $COMMIT^^{tree})
 
-  (cd ./broken
-    git fsck && echo OK || echo NG
+    git replace -f $BROKEN_TREE $PARENT_TREE
+    git cat-file -p $BROKEN_TREE
+
+    git filter-branch --tree-filter true -- --all
+
+    git fsck || true
+
+    git replace -d $BROKEN_TREE
+
+    COMMITS=$(git rev-list --all)
+    for COMMIT in $COMMITS; do
+      if ! git rev-parse $COMMIT^{tree}; then
+        COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+        rm $COMMIT_FILE
+      fi
+    done
+
+    for COMMIT in $COMMITS; do
+      if ! git rev-list $COMMIT; then
+        COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+        if [[ -f $COMMIT_FILE ]]; then
+          rm $COMMIT_FILE
+        fi
+      fi
+    done
+
+    git fsck || true
+
+    git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d
+    git reflog expire --stale-fix --all
+
+    git fsck
   )
 )
 
