@@ -70,4 +70,4 @@ WORKSPACE=$(mktemp -d ./broken-blob.XXXXXX)
   )
 )
 
-# rmtrash $WORKSPACE
+rmtrash $WORKSPACE
