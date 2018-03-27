@@ -2,9 +2,12 @@ version: 2
 jobs:
   build:
     docker:
-      - image: debian:stretch
+      - image: alpine/git
     steps:
       - checkout
+      - run:
+          name: Dependency
+          command: git --version
       - run:
           name: Test
           command: ./test-all.bash
