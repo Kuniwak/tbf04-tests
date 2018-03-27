@@ -38,4 +38,4 @@ workspace=$(mktemp -d ./rebase-reflog-complex-recovery.XXXXXX)
   git show branch-c@{1}
 )
 
-rmtrash $workspace
+rm -rf $workspace

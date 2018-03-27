@@ -66,4 +66,4 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
   )
 )
 
-rmtrash $workspace
+rm -rf $workspace

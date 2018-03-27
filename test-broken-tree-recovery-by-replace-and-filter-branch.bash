@@ -90,4 +90,4 @@ workspace=$(mktemp -d ./broken-tree.XXXXXX)
   )
 )
 
-rmtrash $workspace
+rm -rf $workspace

@@ -33,4 +33,4 @@ workspace=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)
   git reflog
 )
 
-rmtrash $workspace
+rm -rf $workspace

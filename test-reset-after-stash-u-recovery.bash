@@ -22,4 +22,4 @@ workspace=$(mktemp -d ./reset-after-stash-recovery.XXXXXX)
   git log --graph --oneline $dangling_commit
 )
 
-rmtrash $workspace
+rm -rf $workspace

@@ -23,4 +23,4 @@ workspace=$(mktemp -d ./reset-after-stash-fsck-recovery.XXXXXX)
   git cherry-pick $dangling_commit --mainline 1 --no-commit
 )
 
-rmtrash $workspace
+rm -rf $workspace

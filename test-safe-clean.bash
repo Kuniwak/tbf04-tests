@@ -26,4 +26,4 @@ workspace=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)
   git ls-files
 )
 
-rmtrash $workspace
+rm -rf $workspace

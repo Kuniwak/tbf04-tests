@@ -53,4 +53,4 @@ workspace=$(mktemp -d ./object-storage.XXXXXX)
   git verify-pack -v $(find .git/objects/pack -name '*.idx' | head -1)
 )
 
-rmtrash $workspace
+rm -rf $workspace

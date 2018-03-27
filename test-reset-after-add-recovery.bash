@@ -19,4 +19,4 @@ workspace=$(mktemp -d ./reset-after-add-recovery.XXXXXX)
   git show $dangling_blob
 )
 
-rmtrash $workspace
+rm -rf $workspace

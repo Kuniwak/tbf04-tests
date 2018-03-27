@@ -30,4 +30,4 @@ workspace=$(mktemp -d ./rebase-orig-head-recovery.XXXXXX)
   git show branch-c@{1}
 )
 
-rmtrash $workspace
+rm -rf $workspace

@@ -79,4 +79,4 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
   git fsck
 )
 
-rmtrash $workspace
+rm -rf $workspace

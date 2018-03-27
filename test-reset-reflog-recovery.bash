@@ -29,4 +29,4 @@ workspace=$(mktemp -d ./reset-after-reflog-recovery.XXXXXX)
   git reflog master
 )
 
-rmtrash $workspace
+rm -rf $workspace

@@ -20,4 +20,4 @@ workspace=$(mktemp -d ./clean-after-stash-recovery.XXXXXX)
   ls
 )
 
-rmtrash $workspace
+rm -rf $workspace

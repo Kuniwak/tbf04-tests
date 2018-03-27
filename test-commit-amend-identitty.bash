@@ -20,4 +20,4 @@ workspace=$(mktemp -d ./commit-amend-identiry.XXXXXX)
   git rev-parse HEAD
 )
 
-rmtrash $workspace
+rm -rf $workspace

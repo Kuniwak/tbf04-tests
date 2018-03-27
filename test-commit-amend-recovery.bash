@@ -21,4 +21,4 @@ workspace=$(mktemp -d ./reset-commit-amend-recovery.XXXXXX)
   git show HEAD@{1}
 )
 
-rmtrash $workspace
+rm -rf $workspace

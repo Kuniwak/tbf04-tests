@@ -24,4 +24,4 @@ workspace=$(mktemp -d ./rebase-orig-head-recovery.XXXXXX)
 	git show ORIG_HEAD
 )
 
-rmtrash $workspace
+rm -rf $workspace

@@ -19,4 +19,4 @@ workspace=$(mktemp -d ./reset-after-stash-recovery.XXXXXX)
   git fsck
 )
 
-rmtrash $workspace
+rm -rf $workspace
