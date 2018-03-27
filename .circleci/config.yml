@@ -10,7 +10,10 @@ jobs:
           command: git --version
       - run:
           name: Config
-          command: git config --global user.name=Kuniwak && git config --global user.email=orga.chem.job@gmail.com
+          command: |
+            git config --global user.name Kuniwak
+            git config --global user.email orga.chem.job@gmail.com
+            git config --global core.pager ''
       - run:
           name: Test
           command: ./test-all.sh
