@@ -64,11 +64,11 @@ workspace=$(mktemp -d ./broken-tree.XXXXXX)
         git diff $parent..$child
 
         git checkout $children
-        git reset head
+        git reset HEAD
         git rm b
         git write-tree
 
-        git reset head
+        git reset HEAD
         git rm c
         git write-tree
       done

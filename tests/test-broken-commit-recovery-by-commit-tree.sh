@@ -68,7 +68,8 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
     export GIT_AUTHOR_EMAIL='orga.chem.job@gmail.com'
     export GIT_COMMITTER_NAME='Kuniwak'
     export GIT_COMMITTER_EMAIL='orga.chem.job@gmail.com'
-    for time in {1521450633..1521450753}; do
+
+    for time in $(seq -f '%f' 1521450633  1521450753 | sed -e 's/\([^.]*\).*/\1/'); do
       export GIT_AUTHOR_DATE="$time +0900"
       export GIT_COMMITTER_DATE="$time +0900"
 

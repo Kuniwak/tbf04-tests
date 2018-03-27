@@ -35,7 +35,7 @@ workspace=$(mktemp -d ./object-storage.XXXXXX)
   git add e/e
   git commit -m "Add e"
 
-  find .git/objects -type file
+  find .git/objects -type f
 
   commit=$(git rev-parse HEAD)
   tree=$(git cat-file -p HEAD | head -1 | sed -e 's/^tree //')
@@ -45,10 +45,10 @@ workspace=$(mktemp -d ./object-storage.XXXXXX)
   git cat-file -p $tree
   git cat-file -p $blob
 
-  for object in $(find .git/objects -type file); do echo "$object 👈 $(git cat-file -t $(echo $object | sed -e 's/\.git\/objects\/\(..\)\/\(.*\)/\1\2/'))"; done
+  for object in $(find .git/objects -type f); do echo "$object 👈 $(git cat-file -t $(echo $object | sed -e 's/\.git\/objects\/\(..\)\/\(.*\)/\1\2/'))"; done
 
   git gc
-  find .git/objects -type file
+  find .git/objects -type f
 
   git verify-pack -v $(find .git/objects/pack -name '*.idx' | head -1)
 )
