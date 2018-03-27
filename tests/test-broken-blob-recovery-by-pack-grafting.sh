@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 
@@ -49,14 +49,18 @@ workspace=$(mktemp -d ./broken-blob.XXXXXX)
     tree=$(git rev-parse $commit^{tree})
     blob=$(git cat-file -p $tree | grep blob | head -1 | sed -e 's/^[0-9]* [a-z]* \([0-9a-f]*\).*/\1/')
     blob_file=$(echo $blob | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm -f  $blob_file
+    rm -f $blob_file
 
     git fsck || true
+  )
 
-    git add .
-    git reset
+  git clone ./remote ./re-cloned --no-local
+  alter_packfile=$(find re-cloned/.git/objects/pack -name 'pack-*.pack')
+  packfile_basename=$(basename $alter_packfile)
+  mv $alter_packfile ./broken/.git/objects/pack/$packfile_basename
 
-    git fsck
+  (cd ./broken
+    git fsck && echo OK || echo NG
   )
 )
 

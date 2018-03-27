@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/sh -eu
 
 base_dir=$(cd $(dirname $0); pwd)
 

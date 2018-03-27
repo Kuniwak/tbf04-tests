@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 
@@ -27,13 +27,6 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
     export GIT_COMMITTER_DATE='1521450753 +0900'
     git add c
     git commit -m "Add c"
-
-    git checkout -b branch-x
-    echo x > x
-    git add x
-    git commit -m "Add x"
-
-    git checkout master
   )
 
   git clone ./remote ./broken --no-local
@@ -59,39 +52,31 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
     commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
     rm -f $commit_file
 
-    git rev-list --all || true
     git fsck || true
 
-    broken=$(git fsck | grep 'missing commit' | sed -e 's/missing commit \(.*\)/\1/' || true)
+    broken_child=$(git fsck | grep 'broken' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
     broken_parent=$(git fsck | grep 'dangling commit' | sed -e 's/dangling commit \(.*\)/\1/' || true)
     broken_tree=$(git fsck | grep 'dangling tree' | sed -e 's/dangling tree \(.*\)/\1/' || true)
-    repaired_commit=$(git commit-tree $broken_tree -p $broken_parent -m "壊れたcommitを修復（注: 完全な修復はできませんでした）")
 
-    git replace -f $broken $repaired_commit
+    git cat-file -p $broken_parent
+    git cat-file -p $broken_child
 
-    git show $broken
+    broken_parent_tree=$(git log -1 --format=%T $broken_parent)
+    git diff $broken_parent_tree $broken_tree
 
-    git filter-branch -- --all
+    export GIT_AUTHOR_NAME='Kuniwak'
+    export GIT_AUTHOR_EMAIL='orga.chem.job@gmail.com'
+    export GIT_COMMITTER_NAME='Kuniwak'
+    export GIT_COMMITTER_EMAIL='orga.chem.job@gmail.com'
+    for time in {1521450633..1521450753}; do
+      export GIT_AUTHOR_DATE="$time +0900"
+      export GIT_COMMITTER_DATE="$time +0900"
 
-    git rev-list --all
-    git fsck || true
-
-    commits=$(git rev-list --all)
-    git replace -d 6cfd886dd9ab8c040dcb473d51ef4293f006a2a3
-
-    for commit in $commits; do
-      if ! git rev-list $commit; then
-        commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-        rm -f $commit_file
-      fi
+      git commit-tree $broken_tree -p $broken_parent -m 'Add b'
     done
-
-    git fsck || true
-
-    git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d
-    git reflog expire --stale-fix --all
-    git fsck
   )
+
+  git fsck
 )
 
 rm -rf $workspace

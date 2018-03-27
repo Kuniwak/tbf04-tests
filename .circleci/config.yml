@@ -10,4 +10,4 @@ jobs:
           command: git --version
       - run:
           name: Test
-          command: ./test-all.bash
+          command: ./test-all.sh

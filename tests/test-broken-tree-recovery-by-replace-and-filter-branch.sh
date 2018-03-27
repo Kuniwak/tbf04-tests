@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 
@@ -39,10 +39,6 @@ workspace=$(mktemp -d ./broken-tree.XXXXXX)
     git add d
     git commit -m "Add d"
 
-    commit=$(git rev-parse HEAD^^)
-
-    git cat-file -p $commit
-
     git fsck
 
     mv $packfile ./pack
@@ -56,23 +52,39 @@ workspace=$(mktemp -d ./broken-tree.XXXXXX)
     git fsck || true
 
     commit=$(git fsck | grep 'broken link' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
-    parents=$(git rev-parse $commit^@)
-    children=$(for candidate in $(git rev-list --all); do git rev-parse $candidate^@ | grep -q $commit && echo $candidate || true; done)
+    broken_tree=$(git fsck | grep 'missing tree' | sed -e 's/missing tree \(.*\)/\1/' || true)
+    parent_tree=$(git rev-parse $commit^^{tree})
 
-    for parent in $parents; do
-      for child in $children; do
-        git diff $parent..$child
+    git replace -f $broken_tree $parent_tree
+    git cat-file -p $broken_tree
 
-        git checkout $children
-        git reset head
-        git rm b
-        git write-tree
+    git filter-branch --tree-filter true -- --all
 
-        git reset head
-        git rm c
-        git write-tree
-      done
+    git fsck || true
+
+    git replace -d $broken_tree
+
+    commits=$(git rev-list --all)
+    for commit in $commits; do
+      if ! git rev-parse $commit^{tree}; then
+        commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+        rm -f $commit_file
+      fi
     done
+
+    for commit in $commits; do
+      if ! git rev-list $commit; then
+        commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+        if [[ -f $commit_file ]]; then
+          rm -f $commit_file
+        fi
+      fi
+    done
+
+    git fsck || true
+
+    git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d
+    git reflog expire --stale-fix --all
 
     git fsck
   )

@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 
@@ -52,31 +52,18 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
     commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
     rm -f $commit_file
 
+    git log || true
     git fsck || true
-
-    broken_child=$(git fsck | grep 'broken' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
-    broken_parent=$(git fsck | grep 'dangling commit' | sed -e 's/dangling commit \(.*\)/\1/' || true)
-    broken_tree=$(git fsck | grep 'dangling tree' | sed -e 's/dangling tree \(.*\)/\1/' || true)
-
-    git cat-file -p $broken_parent
-    git cat-file -p $broken_child
-
-    broken_parent_tree=$(git log -1 --format=%T $broken_parent)
-    git diff $broken_parent_tree $broken_tree
-
-    export GIT_AUTHOR_NAME='Kuniwak'
-    export GIT_AUTHOR_EMAIL='orga.chem.job@gmail.com'
-    export GIT_COMMITTER_NAME='Kuniwak'
-    export GIT_COMMITTER_EMAIL='orga.chem.job@gmail.com'
-    for time in {1521450633..1521450753}; do
-      export GIT_AUTHOR_DATE="$time +0900"
-      export GIT_COMMITTER_DATE="$time +0900"
-
-      git commit-tree $broken_tree -p $broken_parent -m 'Add b'
-    done
   )
 
-  git fsck
+  git clone ./remote ./re-cloned --no-local
+  alter_packfile=$(find re-cloned/.git/objects/pack -name 'pack-*.pack')
+  packfile_basename=$(basename $alter_packfile)
+  mv $alter_packfile ./broken/.git/objects/pack/$packfile_basename
+
+  (cd ./broken
+    git fsck && echo OK || echo NG
+  )
 )
 
 rm -rf $workspace

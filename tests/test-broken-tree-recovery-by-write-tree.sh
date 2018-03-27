@@ -1,8 +1,8 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 
-workspace=$(mktemp -d ./broken-blob.XXXXXX)
+workspace=$(mktemp -d ./broken-tree.XXXXXX)
 
 (cd $workspace
   mkdir remote
@@ -39,28 +39,42 @@ workspace=$(mktemp -d ./broken-blob.XXXXXX)
     git add d
     git commit -m "Add d"
 
+    commit=$(git rev-parse HEAD^^)
+
+    git cat-file -p $commit
+
     git fsck
 
     mv $packfile ./pack
     git unpack-objects < ./pack
     rm -f ./pack
 
-    commit=$(git rev-parse HEAD^^)
-    tree=$(git rev-parse $commit^{tree})
-    blob=$(git cat-file -p $tree | grep blob | head -1 | sed -e 's/^[0-9]* [a-z]* \([0-9a-f]*\).*/\1/')
-    blob_file=$(echo $blob | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm -f $blob_file
+    tree=$(git cat-file -p HEAD^^ | head -1 | sed -e 's/^tree //')
+    tree_file=$(echo $tree | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm -f $tree_file
 
     git fsck || true
-  )
 
-  git clone ./remote ./re-cloned --no-local
-  alter_packfile=$(find re-cloned/.git/objects/pack -name 'pack-*.pack')
-  packfile_basename=$(basename $alter_packfile)
-  mv $alter_packfile ./broken/.git/objects/pack/$packfile_basename
+    commit=$(git fsck | grep 'broken link' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
+    parents=$(git rev-parse $commit^@)
+    children=$(for candidate in $(git rev-list --all); do git rev-parse $candidate^@ | grep -q $commit && echo $candidate || true; done)
 
-  (cd ./broken
-    git fsck && echo OK || echo NG
+    for parent in $parents; do
+      for child in $children; do
+        git diff $parent..$child
+
+        git checkout $children
+        git reset head
+        git rm b
+        git write-tree
+
+        git reset head
+        git rm c
+        git write-tree
+      done
+    done
+
+    git fsck
   )
 )
 

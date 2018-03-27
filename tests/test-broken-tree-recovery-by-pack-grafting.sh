@@ -1,8 +1,8 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 
-workspace=$(mktemp -d ./broken-commit.XXXXXX)
+workspace=$(mktemp -d ./broken-tree.XXXXXX)
 
 (cd $workspace
   mkdir remote
@@ -49,10 +49,10 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
     git unpack-objects < ./pack
     rm -f ./pack
 
-    commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm -f $commit_file
+    tree=$(git cat-file -p HEAD^^ | head -1 | sed -e 's/^tree //')
+    tree_file=$(echo $tree | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm -f $tree_file
 
-    git log || true
     git fsck || true
   )
 

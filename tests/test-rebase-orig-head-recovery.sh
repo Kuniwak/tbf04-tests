@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 workspace=$(mktemp -d ./rebase-orig-head-recovery.XXXXXX)
@@ -8,7 +8,6 @@ workspace=$(mktemp -d ./rebase-orig-head-recovery.XXXXXX)
   echo a > a
   echo b > b
 	echo c > c
-	echo d > d
   git add a
   git commit -m "Add a"
 
@@ -17,17 +16,12 @@ workspace=$(mktemp -d ./rebase-orig-head-recovery.XXXXXX)
 
   git checkout -b branch-c HEAD@{1}
 
-  git add c
-  git commit -m "Add c"
+	git add c
+	git commit -m "Add c"
 
-  git add d
-  git commit -m "Add d"
-
-  git rebase master
-  git log --oneline
-  git reflog branch-c
-
-  git show branch-c@{1}
+	git rebase master
+	git log --oneline
+	git show ORIG_HEAD
 )
 
 rm -rf $workspace

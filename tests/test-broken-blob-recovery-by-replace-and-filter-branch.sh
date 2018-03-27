@@ -1,8 +1,8 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 
-workspace=$(mktemp -d ./broken-tree.XXXXXX)
+workspace=$(mktemp -d ./broken-blob.XXXXXX)
 
 (cd $workspace
   mkdir remote
@@ -39,30 +39,34 @@ workspace=$(mktemp -d ./broken-tree.XXXXXX)
     git add d
     git commit -m "Add d"
 
-    commit=$(git rev-parse HEAD^^)
-
-    git cat-file -p $commit
-
     git fsck
 
     mv $packfile ./pack
     git unpack-objects < ./pack
     rm -f ./pack
 
-    tree=$(git cat-file -p HEAD^^ | head -1 | sed -e 's/^tree //')
-    tree_file=$(echo $tree | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm -f $tree_file
+    commit=$(git rev-parse HEAD^^)
+    tree=$(git rev-parse $commit^{tree})
+    blob=$(git cat-file -p $tree | grep blob | head -1 | sed -e 's/^[0-9]* [a-z]* \([0-9a-f]*\).*/\1/')
+    blob_file=$(echo $blob | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm -f  $blob_file
 
     git fsck || true
+
+    new_blob=$(echo "このblobは壊れました（注: 完全な復元はできませんでした）" | git hash-object -t blob --stdin -w)
+
+    git replace -f $blob $new_blob
+    git cat-file -p $blob
+
+    git filter-branch --tree-filter true -- --all
+
+    git replace -d $blob
+    git show HEAD^^:a
   )
 
-  git clone ./remote ./re-cloned --no-local
-  alter_packfile=$(find re-cloned/.git/objects/pack -name 'pack-*.pack')
-  packfile_basename=$(basename $alter_packfile)
-  mv $alter_packfile ./broken/.git/objects/pack/$packfile_basename
-
-  (cd ./broken
-    git fsck && echo OK || echo NG
+  git clone ./broken ./repaired
+  (cd ./repaired
+    git fsck
   )
 )
 

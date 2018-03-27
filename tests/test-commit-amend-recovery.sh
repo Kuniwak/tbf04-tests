@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 workspace=$(mktemp -d ./reset-commit-amend-recovery.XXXXXX)

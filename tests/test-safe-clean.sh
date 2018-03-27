@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/sh -eu
 set -o pipefail
 
 workspace=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)

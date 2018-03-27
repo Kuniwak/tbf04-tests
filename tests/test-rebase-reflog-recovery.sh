@@ -1,7 +1,7 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
-workspace=$(mktemp -d ./rebase-reflog-complex-recovery.XXXXXX)
+workspace=$(mktemp -d ./rebase-orig-head-recovery.XXXXXX)
 
 (cd $workspace
   git init
@@ -9,7 +9,6 @@ workspace=$(mktemp -d ./rebase-reflog-complex-recovery.XXXXXX)
   echo b > b
 	echo c > c
 	echo d > d
-	echo e > e
   git add a
   git commit -m "Add a"
 
@@ -23,13 +22,6 @@ workspace=$(mktemp -d ./rebase-reflog-complex-recovery.XXXXXX)
 
   git add d
   git commit -m "Add d"
-
-  git checkout -b branch-e
-
-  git add e
-  git commit -m "Add e"
-
-  git checkout branch-c
 
   git rebase master
   git log --oneline

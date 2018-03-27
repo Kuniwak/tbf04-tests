@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/sh -eux
 set -o pipefail
 
 
@@ -53,19 +53,9 @@ workspace=$(mktemp -d ./broken-blob.XXXXXX)
 
     git fsck || true
 
-    new_blob=$(echo "このblobは壊れました（注: 完全な復元はできませんでした）" | git hash-object -t blob --stdin -w)
+    git add .
+    git reset
 
-    git replace -f $blob $new_blob
-    git cat-file -p $blob
-
-    git filter-branch --tree-filter true -- --all
-
-    git replace -d $blob
-    git show HEAD^^:a
-  )
-
-  git clone ./broken ./repaired
-  (cd ./repaired
     git fsck
   )
 )
