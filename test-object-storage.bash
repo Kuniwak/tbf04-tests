@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./object-storage.XXXXXX)
+workspace=$(mktemp -d ./object-storage.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   git init
 
   echo a > a
@@ -37,13 +37,13 @@ WORKSPACE=$(mktemp -d ./object-storage.XXXXXX)
 
   find .git/objects -type file
 
-  COMMIT=$(git rev-parse HEAD)
-  TREE=$(git cat-file -p HEAD | head -1 | sed -e 's/^tree //')
-  BLOB=$(git cat-file -p $TREE | head -1 | sed -e 's/^[0-9]* [a-z]* \([0-9a-f]*\).*/\1/')
+  commit=$(git rev-parse HEAD)
+  tree=$(git cat-file -p HEAD | head -1 | sed -e 's/^tree //')
+  blob=$(git cat-file -p $tree | head -1 | sed -e 's/^[0-9]* [a-z]* \([0-9a-f]*\).*/\1/')
 
-  git cat-file -p $COMMIT
-  git cat-file -p $TREE
-  git cat-file -p $BLOB
+  git cat-file -p $commit
+  git cat-file -p $tree
+  git cat-file -p $blob
 
   for object in $(find .git/objects -type file); do echo "$object 👈 $(git cat-file -t $(echo $object | sed -e 's/\.git\/objects\/\(..\)\/\(.*\)/\1\2/'))"; done
 
@@ -53,4 +53,4 @@ WORKSPACE=$(mktemp -d ./object-storage.XXXXXX)
   git verify-pack -v $(find .git/objects/pack -name '*.idx' | head -1)
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

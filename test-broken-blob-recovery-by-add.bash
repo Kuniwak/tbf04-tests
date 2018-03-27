@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./broken-blob.XXXXXX)
+workspace=$(mktemp -d ./broken-blob.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   mkdir remote
 
   (cd remote
@@ -31,7 +31,7 @@ WORKSPACE=$(mktemp -d ./broken-blob.XXXXXX)
 
   git clone ./remote ./broken --no-local
   (cd broken
-    PACKFILE=$(find .git/objects/pack -name 'pack-*.pack')
+    packfile=$(find .git/objects/pack -name 'pack-*.pack')
     echo d > d
 
     export GIT_AUTHOR_DATE='1521450753 +0900'
@@ -41,15 +41,15 @@ WORKSPACE=$(mktemp -d ./broken-blob.XXXXXX)
 
     git fsck
 
-    mv $PACKFILE ./pack
+    mv $packfile ./pack
     git unpack-objects < ./pack
     rm ./pack
 
-    COMMIT=$(git rev-parse HEAD^^)
-    TREE=$(git rev-parse $COMMIT^{tree})
-    BLOB=$(git cat-file -p $TREE | grep blob | head -1 | sed -e 's/^[0-9]* [a-z]* \([0-9a-f]*\).*/\1/')
-    BLOB_FILE=$(echo $BLOB | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $BLOB_FILE
+    commit=$(git rev-parse HEAD^^)
+    tree=$(git rev-parse $commit^{tree})
+    blob=$(git cat-file -p $tree | grep blob | head -1 | sed -e 's/^[0-9]* [a-z]* \([0-9a-f]*\).*/\1/')
+    blob_file=$(echo $blob | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm  $blob_file
 
     git fsck || true
 
@@ -60,4 +60,4 @@ WORKSPACE=$(mktemp -d ./broken-blob.XXXXXX)
   )
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

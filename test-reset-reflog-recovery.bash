@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./reset-after-reflog-recovery.XXXXXX)
+workspace=$(mktemp -d ./reset-after-reflog-recovery.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   git init
 
   for i in {1..5}; do
@@ -29,4 +29,4 @@ WORKSPACE=$(mktemp -d ./reset-after-reflog-recovery.XXXXXX)
   git reflog master
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

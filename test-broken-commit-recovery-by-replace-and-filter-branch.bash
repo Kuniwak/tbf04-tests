@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
+workspace=$(mktemp -d ./broken-commit.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   mkdir remote
 
   (cd remote
@@ -38,7 +38,7 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
 
   git clone ./remote ./broken --no-local
   (cd broken
-    PACKFILE=$(find .git/objects/pack -name 'pack-*.pack')
+    packfile=$(find .git/objects/pack -name 'pack-*.pack')
     echo d > d
 
     export GIT_AUTHOR_DATE='1521450753 +0900'
@@ -46,43 +46,43 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
     git add d
     git commit -m "Add d"
 
-    COMMIT=$(git rev-parse HEAD^^)
+    commit=$(git rev-parse HEAD^^)
 
-    git cat-file -p $COMMIT
+    git cat-file -p $commit
 
     git fsck
 
-    mv $PACKFILE ./pack
+    mv $packfile ./pack
     git unpack-objects < ./pack
     rmtrash ./pack
 
-    COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $COMMIT_FILE
+    commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm  $commit_file
 
     git rev-list --all || true
     git fsck || true
 
-    BROKEN=$(git fsck | grep 'missing commit' | sed -e 's/missing commit \(.*\)/\1/' || true)
-    BROKEN_PARENT=$(git fsck | grep 'dangling commit' | sed -e 's/dangling commit \(.*\)/\1/' || true)
-    BROKEN_TREE=$(git fsck | grep 'dangling tree' | sed -e 's/dangling tree \(.*\)/\1/' || true)
-    REPAIRED_COMMIT=$(git commit-tree $BROKEN_TREE -p $BROKEN_PARENT -m "壊れたcommitを修復（注: 完全な修復はできませんでした）")
+    broken=$(git fsck | grep 'missing commit' | sed -e 's/missing commit \(.*\)/\1/' || true)
+    broken_parent=$(git fsck | grep 'dangling commit' | sed -e 's/dangling commit \(.*\)/\1/' || true)
+    broken_tree=$(git fsck | grep 'dangling tree' | sed -e 's/dangling tree \(.*\)/\1/' || true)
+    repaired_commit=$(git commit-tree $broken_tree -p $broken_parent -m "壊れたcommitを修復（注: 完全な修復はできませんでした）")
 
-    git replace -f $BROKEN $REPAIRED_COMMIT
+    git replace -f $broken $repaired_commit
 
-    git show $BROKEN
+    git show $broken
 
     git filter-branch -- --all
 
     git rev-list --all
     git fsck || true
 
-    COMMITS=$(git rev-list --all)
+    commits=$(git rev-list --all)
     git replace -d 6cfd886dd9ab8c040dcb473d51ef4293f006a2a3
 
-    for COMMIT in $COMMITS; do
-      if ! git rev-list $COMMIT; then
-        COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-        rmtrash $COMMIT_FILE
+    for commit in $commits; do
+      if ! git rev-list $commit; then
+        commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+        rmtrash $commit_file
       fi
     done
 
@@ -94,4 +94,4 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
   )
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

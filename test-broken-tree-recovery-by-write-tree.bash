@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
+workspace=$(mktemp -d ./broken-tree.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   mkdir remote
 
   (cd remote
@@ -31,7 +31,7 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
 
   git clone ./remote ./broken --no-local
   (cd broken
-    PACKFILE=$(find .git/objects/pack -name 'pack-*.pack')
+    packfile=$(find .git/objects/pack -name 'pack-*.pack')
     echo d > d
 
     export GIT_AUTHOR_DATE='1521450753 +0900'
@@ -39,36 +39,36 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
     git add d
     git commit -m "Add d"
 
-    COMMIT=$(git rev-parse HEAD^^)
+    commit=$(git rev-parse HEAD^^)
 
-    git cat-file -p $COMMIT
+    git cat-file -p $commit
 
     git fsck
 
-    mv $PACKFILE ./pack
+    mv $packfile ./pack
     git unpack-objects < ./pack
     rmtrash ./pack
 
-    TREE=$(git cat-file -p HEAD^^ | head -1 | sed -e 's/^tree //')
-    TREE_FILE=$(echo $TREE | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $TREE_FILE
+    tree=$(git cat-file -p HEAD^^ | head -1 | sed -e 's/^tree //')
+    tree_file=$(echo $tree | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm  $tree_file
 
     git fsck || true
 
-    COMMIT=$(git fsck | grep 'broken link' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
-    PARENTS=$(git rev-parse $COMMIT^@)
-    CHILDREN=$(for CANDIDATE in $(git rev-list --all); do git rev-parse $CANDIDATE^@ | grep -q $COMMIT && echo $CANDIDATE || true; done)
+    commit=$(git fsck | grep 'broken link' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
+    parents=$(git rev-parse $commit^@)
+    children=$(for candidate in $(git rev-list --all); do git rev-parse $candidate^@ | grep -q $commit && echo $candidate || true; done)
 
-    for PARENT in $PARENTS; do
-      for CHILD in $CHILDREN; do
-        git diff $PARENT..$CHILD
+    for parent in $parents; do
+      for child in $children; do
+        git diff $parent..$child
 
-        git checkout $CHILDREN
-        git reset HEAD
+        git checkout $children
+        git reset head
         git rm b
         git write-tree
 
-        git reset HEAD
+        git reset head
         git rm c
         git write-tree
       done
@@ -78,4 +78,4 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
   )
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

@@ -1,9 +1,9 @@
 #!/bin/bash -eu
 set -o pipefail
 
-WORKSPACE=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)
+workspace=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   mkdir origin
   pushd origin
   git init
@@ -26,4 +26,4 @@ WORKSPACE=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)
   git ls-files
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

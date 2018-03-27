@@ -1,9 +1,9 @@
 #!/bin/bash -eux
 set -o pipefail
 
-WORKSPACE=$(mktemp -d ./reset-commit-amend-recovery.XXXXXX)
+workspace=$(mktemp -d ./reset-commit-amend-recovery.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   git init
   echo a > a
   echo b > b
@@ -21,4 +21,4 @@ WORKSPACE=$(mktemp -d ./reset-commit-amend-recovery.XXXXXX)
   git show HEAD@{1}
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

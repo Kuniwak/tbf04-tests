@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)
+workspace=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   git init
 
   echo a > a
@@ -33,4 +33,4 @@ WORKSPACE=$(mktemp -d ./reset-branch-d-recovery.XXXXXX)
   git reflog
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

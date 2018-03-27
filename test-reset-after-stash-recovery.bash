@@ -1,9 +1,9 @@
 #!/bin/bash -eux
 set -o pipefail
 
-WORKSPACE=$(mktemp -d ./reset-after-stash-recovery.XXXXXX)
+workspace=$(mktemp -d ./reset-after-stash-recovery.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   git init
   echo a > a
   echo b > b
@@ -19,4 +19,4 @@ WORKSPACE=$(mktemp -d ./reset-after-stash-recovery.XXXXXX)
   git fsck
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

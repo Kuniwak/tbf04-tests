@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
+workspace=$(mktemp -d ./broken-tree.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   mkdir remote
 
   (cd remote
@@ -31,7 +31,7 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
 
   git clone ./remote ./broken --no-local
   (cd broken
-    PACKFILE=$(find .git/objects/pack -name 'pack-*.pack')
+    packfile=$(find .git/objects/pack -name 'pack-*.pack')
     echo d > d
 
     export GIT_AUTHOR_DATE='1521450753 +0900'
@@ -41,42 +41,42 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
 
     git fsck
 
-    mv $PACKFILE ./pack
+    mv $packfile ./pack
     git unpack-objects < ./pack
     rmtrash ./pack
 
-    TREE=$(git cat-file -p HEAD^^ | head -1 | sed -e 's/^tree //')
-    TREE_FILE=$(echo $TREE | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $TREE_FILE
+    tree=$(git cat-file -p HEAD^^ | head -1 | sed -e 's/^tree //')
+    tree_file=$(echo $tree | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm  $tree_file
 
     git fsck || true
 
-    COMMIT=$(git fsck | grep 'broken link' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
-    BROKEN_TREE=$(git fsck | grep 'missing tree' | sed -e 's/missing tree \(.*\)/\1/' || true)
-    PARENT_TREE=$(git rev-parse $COMMIT^^{tree})
+    commit=$(git fsck | grep 'broken link' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
+    broken_tree=$(git fsck | grep 'missing tree' | sed -e 's/missing tree \(.*\)/\1/' || true)
+    parent_tree=$(git rev-parse $commit^^{tree})
 
-    git replace -f $BROKEN_TREE $PARENT_TREE
-    git cat-file -p $BROKEN_TREE
+    git replace -f $broken_tree $parent_tree
+    git cat-file -p $broken_tree
 
     git filter-branch --tree-filter true -- --all
 
     git fsck || true
 
-    git replace -d $BROKEN_TREE
+    git replace -d $broken_tree
 
-    COMMITS=$(git rev-list --all)
-    for COMMIT in $COMMITS; do
-      if ! git rev-parse $COMMIT^{tree}; then
-        COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-        rm $COMMIT_FILE
+    commits=$(git rev-list --all)
+    for commit in $commits; do
+      if ! git rev-parse $commit^{tree}; then
+        commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+        rm $commit_file
       fi
     done
 
-    for COMMIT in $COMMITS; do
-      if ! git rev-list $COMMIT; then
-        COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-        if [[ -f $COMMIT_FILE ]]; then
-          rm $COMMIT_FILE
+    for commit in $commits; do
+      if ! git rev-list $commit; then
+        commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+        if [[ -f $commit_file ]]; then
+          rm $commit_file
         fi
       fi
     done
@@ -90,4 +90,4 @@ WORKSPACE=$(mktemp -d ./broken-tree.XXXXXX)
   )
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

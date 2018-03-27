@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./commit-amend-identiry.XXXXXX)
+workspace=$(mktemp -d ./commit-amend-identiry.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   git init
 	git commit --allow-empty -m "Initial commit"
 
@@ -13,11 +13,11 @@ WORKSPACE=$(mktemp -d ./commit-amend-identiry.XXXXXX)
   git commit -m "Add a"
   git rev-parse HEAD
 
-  GIT_AUTHOR_DATE=$(git log -1 --format=%aD)
-  GIT_COMMITTER_DATE=$(git log -1 --format=%cD)
+  export GIT_AUTHOR_DATE=$(git log -1 --format=%aD)
+  export GIT_COMMITTER_DATE=$(git log -1 --format=%cD)
 
   git commit --amend --no-edit
   git rev-parse HEAD
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

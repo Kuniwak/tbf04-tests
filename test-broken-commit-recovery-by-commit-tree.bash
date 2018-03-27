@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
+workspace=$(mktemp -d ./broken-commit.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   mkdir remote
 
   (cd remote
@@ -31,7 +31,7 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
 
   git clone ./remote ./broken --no-local
   (cd broken
-    PACKFILE=$(find .git/objects/pack -name 'pack-*.pack')
+    packfile=$(find .git/objects/pack -name 'pack-*.pack')
     echo d > d
 
     export GIT_AUTHOR_DATE='1521450753 +0900'
@@ -39,30 +39,30 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
     git add d
     git commit -m "Add d"
 
-    COMMIT=$(git rev-parse HEAD^^)
+    commit=$(git rev-parse HEAD^^)
 
-    git cat-file -p $COMMIT
+    git cat-file -p $commit
 
     git fsck
 
-    mv $PACKFILE ./pack
+    mv $packfile ./pack
     git unpack-objects < ./pack
     rmtrash ./pack
 
-    COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $COMMIT_FILE
+    commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm  $commit_file
 
     git fsck || true
 
-    BROKEN_CHILD=$(git fsck | grep 'broken' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
-    BROKEN_PARENT=$(git fsck | grep 'dangling commit' | sed -e 's/dangling commit \(.*\)/\1/' || true)
-    BROKEN_TREE=$(git fsck | grep 'dangling tree' | sed -e 's/dangling tree \(.*\)/\1/' || true)
+    broken_child=$(git fsck | grep 'broken' | sed -e 's/broken link from  commit \(.*\)/\1/' || true)
+    broken_parent=$(git fsck | grep 'dangling commit' | sed -e 's/dangling commit \(.*\)/\1/' || true)
+    broken_tree=$(git fsck | grep 'dangling tree' | sed -e 's/dangling tree \(.*\)/\1/' || true)
 
-    git cat-file -p $BROKEN_PARENT
-    git cat-file -p $BROKEN_CHILD
+    git cat-file -p $broken_parent
+    git cat-file -p $broken_child
 
-    BROKEN_PARENT_TREE=$(git log -1 --format=%T $BROKEN_PARENT)
-    git diff $BROKEN_PARENT_TREE $BROKEN_TREE
+    broken_parent_tree=$(git log -1 --format=%T $broken_parent)
+    git diff $broken_parent_tree $broken_tree
 
     export GIT_AUTHOR_NAME='Kuniwak'
     export GIT_AUTHOR_EMAIL='orga.chem.job@gmail.com'
@@ -72,11 +72,11 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
       export GIT_AUTHOR_DATE="$time +0900"
       export GIT_COMMITTER_DATE="$time +0900"
 
-      git commit-tree $BROKEN_TREE -p $BROKEN_PARENT -m 'Add b'
+      git commit-tree $broken_tree -p $broken_parent -m 'Add b'
     done
   )
 
   git fsck
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

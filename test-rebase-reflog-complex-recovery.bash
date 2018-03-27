@@ -1,9 +1,9 @@
 #!/bin/bash -eux
 set -o pipefail
 
-WORKSPACE=$(mktemp -d ./rebase-reflog-complex-recovery.XXXXXX)
+workspace=$(mktemp -d ./rebase-reflog-complex-recovery.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   git init
   echo a > a
   echo b > b
@@ -38,4 +38,4 @@ WORKSPACE=$(mktemp -d ./rebase-reflog-complex-recovery.XXXXXX)
   git show branch-c@{1}
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

@@ -2,9 +2,9 @@
 set -o pipefail
 
 
-WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
+workspace=$(mktemp -d ./broken-commit.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   mkdir remote
 
   (cd remote
@@ -31,7 +31,7 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
 
   git clone ./remote ./broken --no-local
   (cd broken
-    PACKFILE=$(find .git/objects/pack -name 'pack-*.pack')
+    packfile=$(find .git/objects/pack -name 'pack-*.pack')
     echo d > d
 
     export GIT_AUTHOR_DATE='1521450753 +0900'
@@ -39,31 +39,31 @@ WORKSPACE=$(mktemp -d ./broken-commit.XXXXXX)
     git add d
     git commit -m "Add d"
 
-    COMMIT=$(git rev-parse HEAD^^)
+    commit=$(git rev-parse HEAD^^)
 
-    git cat-file -p $COMMIT
+    git cat-file -p $commit
 
     git fsck
 
-    mv $PACKFILE ./pack
+    mv $packfile ./pack
     git unpack-objects < ./pack
     rmtrash ./pack
 
-    COMMIT_FILE=$(echo $COMMIT | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $COMMIT_FILE
+    commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
+    rm  $commit_file
 
     git log || true
     git fsck || true
   )
 
   git clone ./remote ./re-cloned --no-local
-  ALTER_PACKFILE=$(find re-cloned/.git/objects/pack -name 'pack-*.pack')
-  PACKFILE_BASENAME=$(basename $ALTER_PACKFILE)
-  mv $ALTER_PACKFILE ./broken/.git/objects/pack/$PACKFILE_BASENAME
+  alter_packfile=$(find re-cloned/.git/objects/pack -name 'pack-*.pack')
+  packfile_basename=$(basename $alter_packfile)
+  mv $alter_packfile ./broken/.git/objects/pack/$packfile_basename
 
   (cd ./broken
     git fsck && echo OK || echo NG
   )
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace

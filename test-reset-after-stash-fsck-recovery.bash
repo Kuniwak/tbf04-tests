@@ -1,9 +1,9 @@
 #!/bin/bash -eux
 set -o pipefail
 
-WORKSPACE=$(mktemp -d ./reset-after-stash-fsck-recovery.XXXXXX)
+workspace=$(mktemp -d ./reset-after-stash-fsck-recovery.XXXXXX)
 
-(cd $WORKSPACE
+(cd $workspace
   git init
   echo a > a
   echo b > b
@@ -16,11 +16,11 @@ WORKSPACE=$(mktemp -d ./reset-after-stash-fsck-recovery.XXXXXX)
   git stash clear
 
   git fsck
-  DANGLING_COMMIT=$(git fsck | grep 'dangling commit' | sed -e 's/^dangling commit \([0-9a-f]*\)/\1/')
+  dangling_commit=$(git fsck | grep 'dangling commit' | sed -e 's/^dangling commit \([0-9a-f]*\)/\1/')
 
-  git log $DANGLING_COMMIT --graph --oneline
-  git show $DANGLING_COMMIT^@
-  git cherry-pick $DANGLING_COMMIT --mainline 1 --no-commit
+  git log $dangling_commit --graph --oneline
+  git show $dangling_commit^@
+  git cherry-pick $dangling_commit --mainline 1 --no-commit
 )
 
-rmtrash $WORKSPACE
+rmtrash $workspace
