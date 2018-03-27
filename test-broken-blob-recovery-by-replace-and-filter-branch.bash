@@ -43,13 +43,13 @@ workspace=$(mktemp -d ./broken-blob.XXXXXX)
 
     mv $packfile ./pack
     git unpack-objects < ./pack
-    rmtrash ./pack
+    rm -f ./pack
 
     commit=$(git rev-parse HEAD^^)
     tree=$(git rev-parse $commit^{tree})
     blob=$(git cat-file -p $tree | grep blob | head -1 | sed -e 's/^[0-9]* [a-z]* \([0-9a-f]*\).*/\1/')
     blob_file=$(echo $blob | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $blob_file
+    rm -f  $blob_file
 
     git fsck || true
 

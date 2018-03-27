@@ -43,11 +43,11 @@ workspace=$(mktemp -d ./broken-tree.XXXXXX)
 
     mv $packfile ./pack
     git unpack-objects < ./pack
-    rmtrash ./pack
+    rm -f ./pack
 
     tree=$(git cat-file -p HEAD^^ | head -1 | sed -e 's/^tree //')
     tree_file=$(echo $tree | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $tree_file
+    rm -f $tree_file
 
     git fsck || true
 
@@ -68,7 +68,7 @@ workspace=$(mktemp -d ./broken-tree.XXXXXX)
     for commit in $commits; do
       if ! git rev-parse $commit^{tree}; then
         commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-        rm $commit_file
+        rm -f $commit_file
       fi
     done
 
@@ -76,7 +76,7 @@ workspace=$(mktemp -d ./broken-tree.XXXXXX)
       if ! git rev-list $commit; then
         commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
         if [[ -f $commit_file ]]; then
-          rm $commit_file
+          rm -f $commit_file
         fi
       fi
     done

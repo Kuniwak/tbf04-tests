@@ -47,10 +47,10 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
 
     mv $packfile ./pack
     git unpack-objects < ./pack
-    rmtrash ./pack
+    rm -f ./pack
 
     commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $commit_file
+    rm -f $commit_file
 
     git log || true
     git fsck || true

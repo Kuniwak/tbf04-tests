@@ -54,10 +54,10 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
 
     mv $packfile ./pack
     git unpack-objects < ./pack
-    rmtrash ./pack
+    rm -f ./pack
 
     commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-    rm  $commit_file
+    rm -f $commit_file
 
     git rev-list --all || true
     git fsck || true
@@ -82,7 +82,7 @@ workspace=$(mktemp -d ./broken-commit.XXXXXX)
     for commit in $commits; do
       if ! git rev-list $commit; then
         commit_file=$(echo $commit | sed -e 's/\(..\)\(.*\)/.git\/objects\/\1\/\2/')
-        rmtrash $commit_file
+        rm -f $commit_file
       fi
     done
 
